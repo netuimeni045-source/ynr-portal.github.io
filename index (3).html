@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЮНР — Президентский Портал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════ */
+:root {
+  --void:      #03060B; --deep:      #060C16; --base:      #090F1E;
+  --surface:   #0C1526; --raised:    #101C30; --card:      #142239; --high: #182944;
+  --gold:      #C8A44C; --gold2:     #D4B461; --gold3:     #E0C97C;
+  --gold-dim:  rgba(200,164,76,0.08); --gold-glow: rgba(200,164,76,0.18);
+  --crimson2:  #AA1818; --blue2:     #2563EB;
+  --ok:        #15803D; --ok2:       #22C55E; --ok-dim:    rgba(34,197,94,0.10);
+  --warn:      #D97706; --warn2:     #F59E0B; --warn-dim:  rgba(245,158,11,0.10);
+  --err:       #DC2626; --err2:      #EF4444; --err-dim:   rgba(239,68,68,0.10);
+  --t1: #ECF1F8; --t2: #7A9BB8; --t3: #374F68; --t4: #1F3148;
+  --b0: rgba(200,164,76,0.05); --b1: rgba(200,164,76,0.12); --b2: rgba(200,164,76,0.22);
+  --sidebar: 278px; --header:  62px; --r1: 4px; --r2: 8px; --r3: 12px;
+  --fast: 0.15s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Barlow', sans-serif; background: var(--void); color: var(--t1); height: 100vh; overflow: hidden; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(200,164,76,0.010) 60px, rgba(200,164,76,0.010) 61px); }
+
+.classbar { position: fixed; top: 0; left: 0; right: 0; height: 22px; background: var(--crimson2); display: flex; align-items: center; justify-content: center; gap: 16px; z-index: 10000; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.classbar-text { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3.5px; text-transform: uppercase; color: rgba(255,255,255,0.90); }
+.classbar-diamond { width: 4px; height: 4px; transform: rotate(45deg); background: rgba(255,255,255,0.35); flex-shrink: 0; }
+
+/* Auth Screen */
+.auth-screen { position: fixed; inset: 0; padding-top: 22px; background: var(--void); display: flex; align-items: center; justify-content: center; z-index: 9000; }
+.auth-container { width: 100%; max-width: 476px; padding: 0 24px; }
+.seal-wrap { display: flex; justify-content: center; margin-bottom: 26px; }
+.seal-icon { width: 54px; height: 54px; background: var(--base); border-radius: 50%; border: 1px solid var(--b2); display: flex; align-items: center; justify-content: center; color: var(--gold2); font-size: 22px; }
+.auth-head { text-align: center; margin-bottom: 28px; }
+.auth-state-name { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 700; letter-spacing: 4px; color: var(--t1); line-height: 1.1; margin-bottom: 10px; }
+.auth-gold-bar { width: 56px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0 auto 10px; }
+.auth-portal-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 3.5px; text-transform: uppercase; color: var(--t3); }
+.auth-card { background: var(--surface); border: 1px solid var(--b1); border-radius: var(--r3); overflow: hidden; position: relative; }
+.auth-card::before { content: ''; display: block; height: 2px; background: linear-gradient(90deg, transparent 5%, var(--gold) 30%, var(--gold2) 70%, transparent 95%); }
+.auth-card-body { padding: 30px 34px 34px; }
+.auth-step.gone { display: none; }
+.auth-card-title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; color: var(--t1); margin-bottom: 4px; }
+.auth-card-sub { font-size: 12px; color: var(--t3); margin-bottom: 26px; line-height: 1.65; }
+
+.fgroup { margin-bottom: 18px; }
+.flabel { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--t3); margin-bottom: 8px; }
+.finput-wrap { position: relative; }
+.finput-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--t4); font-size: 12px; pointer-events: none; }
+.finput { width: 100%; background: var(--raised); border: 1px solid var(--b1); border-radius: var(--r1); color: var(--t1); font-size: 14px; padding: 12px 14px 12px 42px; outline: none; }
+.finput:focus { border-color: var(--gold); background: var(--card); }
+.finput.otp { padding: 14px; text-align: center; letter-spacing: 12px; font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600; color: var(--gold3); }
+
+.btn-auth { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 20px; background: var(--gold); border: none; border-radius: var(--r1); color: var(--void); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.btn-auth:hover { background: var(--gold2); }
+
+/* App Layout */
+.app-root { display: none; width: 100%; height: calc(100vh - 22px); margin-top: 22px; }
+.app-root.active { display: flex; }
+.sidebar { width: var(--sidebar); height: 100%; background: var(--deep); border-right: 1px solid var(--b1); display: flex; flex-direction: column; flex-shrink: 0; }
+.sb-brand { padding: 20px; border-bottom: 1px solid var(--b1); }
+.sb-brand-row { display: flex; align-items: center; gap: 12px; }
+.sb-emblem { width: 40px; height: 40px; border-radius: 50%; background: var(--gold-dim); border: 1px solid var(--b2); display: flex; align-items: center; justify-content: center; color: var(--gold2); font-size: 17px; }
+.sb-name { font-family: 'Cinzel', serif; font-size: 17px; font-weight: 700; letter-spacing: 2px; color: var(--t1); }
+.sb-tagline { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; color: var(--t3); text-transform: uppercase; margin-top: 2px; letter-spacing: 1px; }
+
+.nav-section { padding: 16px 0 6px; }
+.nav-list { list-style: none; }
+.nav-link { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: var(--t2); text-decoration: none; font-size: 13px; font-weight: 500; border-left: 2px solid transparent; cursor: pointer; }
+.nav-link:hover { color: var(--t1); background: rgba(200,164,76,0.04); }
+.nav-link.active { color: var(--gold3); border-left-color: var(--gold); background: var(--gold-dim); font-weight: 600; }
+.nav-icon { width: 16px; text-align: center; }
+
+.sb-user { margin-top: auto; border-top: 1px solid var(--b1); padding: 16px 20px; }
+.user-row { display: flex; align-items: center; gap: 11px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--gold-glow); border: 2px solid var(--b2); display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold2); }
+.user-details { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; color: var(--t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-role { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; color: var(--gold2); letter-spacing: 1.5px; text-transform: uppercase; }
+.btn-logout { background: none; border: 1px solid var(--b1); border-radius: var(--r1); color: var(--t3); cursor: pointer; padding: 7px 9px; }
+.btn-logout:hover { border-color: var(--err); color: var(--err2); }
+
+.main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main-header { height: var(--header); background: rgba(6,12,22,0.88); border-bottom: 1px solid var(--b1); display: flex; align-items: center; padding: 0 30px; }
+.hdr-breadcrumb { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); }
+.hdr-current { color: var(--gold2); }
+
+.pages-area { flex: 1; overflow-y: auto; padding: 28px 30px; }
+.app-page { display: none; }
+.app-page.active { display: block; }
+
+/* Cards & Forms */
+.card { background: var(--surface); border: 1px solid var(--b1); border-radius: var(--r2); padding: 22px 26px; margin-bottom: 16px; }
+.editor-card { background: var(--surface); border: 1px solid var(--b2); border-radius: var(--r2); overflow: hidden; margin-bottom: 20px; }
+.editor-head { background: var(--raised); padding: 14px 22px; border-bottom: 1px solid var(--b1); }
+.editor-head-label { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; color: var(--gold2); }
+.editor-body { padding: 20px 22px; }
+.editor-form-row { margin-bottom: 13px; }
+.editor-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--t3); margin-bottom: 7px; }
+
+.gov-input { width: 100%; background: var(--raised); border: 1px solid var(--b1); border-radius: var(--r1); color: var(--t1); font-size: 13px; padding: 11px 14px; outline: none; display: block; }
+.gov-input:focus { border-color: var(--gold); }
+.gov-textarea { resize: vertical; min-height: 98px; font-family: inherit; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 18px; border-radius: var(--r1); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border: none; }
+.btn-gold { background: var(--gold); color: var(--void); }
+.btn-gold:hover { background: var(--gold2); }
+.btn-green { background: var(--ok2); color: var(--void); margin-right: 8px; }
+.btn-red { background: var(--err2); color: var(--void); }
+
+/* Items Display */
+.feed-grid { display: grid; grid-template-columns: 1fr 296px; gap: 16px; align-items: start; }
+.post-list, .ref-list { display: flex; flex-direction: column; gap: 16px; }
+.post-card, .ref-card { background: var(--surface); border: 1px solid var(--b1); border-radius: var(--r2); padding: 20px; }
+.post-card { border-left: 2px solid var(--gold); }
+.post-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 11px; }
+.post-author { color: var(--gold2); font-weight: 600; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+.post-ts { font-family: 'JetBrains Mono', monospace; color: var(--t3); }
+.post-title { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 600; color: var(--t1); margin-bottom: 10px; }
+.post-body { font-size: 13px; color: var(--t2); line-height: 1.7; }
+
+.ref-img { width: 100%; max-height: 300px; object-fit: cover; border-radius: var(--r1); margin: 12px 0; border: 1px solid var(--b1); }
+.ref-stats { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-left: 6px; font-weight: 600; color: #fff; }
+
+/* Admin Only block setup */
+.admin-only { display: none; }
+</style>
+</head>
+<body>
+
+<div class="classbar">
+  <div class="classbar-diamond"></div>
+  <div class="classbar-text">Южная Народная Республика — Президентский Портал</div>
+  <div class="classbar-diamond"></div>
+</div>
+
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-container">
+    <div class="seal-wrap"><div class="seal-icon"><i class="fa-solid fa-shield-halved"></i></div></div>
+    <div class="auth-head">
+      <div class="auth-state-name">Южная Народная Республика</div>
+      <div class="auth-gold-bar"></div>
+      <div class="auth-portal-label">Официальная Система Управления</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-body">
+        <div class="auth-step" id="auth-step-1">
+          <div class="auth-card-title">Авторизация в системе</div>
+          <div class="auth-card-sub">Используйте почту Администратора для публикации новостей и референдумов.</div>
+          <div class="fgroup">
+            <label class="flabel">Ваш Email</label>
+            <div class="finput-wrap">
+              <input type="text" id="input-email" class="finput" placeholder="example@gmail.com">
+              <i class="fa-regular fa-envelope finput-icon"></i>
+            </div>
+          </div>
+          <button class="btn-auth" onclick="handleLogin()">Продолжить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-root" id="app-root">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-row">
+        <div class="sb-emblem"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <div class="sb-name">Портал ЮНР</div>
+          <div class="sb-tagline">Панель Управления</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <ul class="nav-list">
+        <li>
+          <a class="nav-link active" id="nav-btn-feed" onclick="switchPage('feed')">
+            <i class="fa-solid fa-bullhorn nav-icon"></i><span>Лента Указов</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" id="nav-btn-referendums" onclick="switchPage('referendums')">
+            <i class="fa-solid fa-check-to-slot nav-icon"></i><span>Референдумы</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sb-user">
+      <div class="user-row">
+        <div class="user-avatar" id="user-avatar-display">G</div>
+        <div class="user-details">
+          <div class="user-name" id="user-name-display">Гость</div>
+          <div class="user-role" id="user-role-display">Читатель</div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" title="Выйти"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="main-header">
+      <div class="hdr-breadcrumb">ЮНР / <span class="hdr-current" id="header-title">Лента Указов</span></div>
+    </header>
+
+    <div class="pages-area">
+      <div class="app-page active" id="page-feed">
+        <div class="feed-grid">
+          <div>
+            <div class="editor-card admin-only" id="post-editor">
+              <div class="editor-head"><div class="editor-head-label"><i class="fa-solid fa-feather-pointed"></i> Создать новый Указ</div></div>
+              <div class="editor-body">
+                <div class="editor-form-row">
+                  <label class="editor-label">Заголовок</label>
+                  <input type="text" id="decree-title-input" class="gov-input" placeholder="Введите название...">
+                </div>
+                <div class="editor-form-row">
+                  <label class="editor-label">Текст Указа</label>
+                  <textarea id="decree-body-input" class="gov-input gov-textarea" placeholder="Напишите текст..."></textarea>
+                </div>
+                <button class="btn btn-gold" onclick="publishDecree()">Опубликовать</button>
+              </div>
+            </div>
+            <div class="post-list" id="decree-feed"></div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title"><i class="fa-solid fa-circle-info"></i> Статус Платформы</div>
+              <p style="font-size:12px; color:var(--t2); line-height:1.5; margin-top:8px;">
+                Вы вошли в систему. Публикация доступна эксклюзивно для Администрации ЮНР.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-page" id="page-referendums">
+        <div class="editor-card admin-only" id="ref-editor">
+          <div class="editor-head"><div class="editor-head-label"><i class="fa-solid fa-plus"></i> Начать новый Референдум</div></div>
+          <div class="editor-body">
+            <div class="editor-form-row">
+              <label class="editor-label">Вопрос референдума</label>
+              <input type="text" id="ref-title-input" class="gov-input" placeholder="Например: Принятие новой конституции...">
+            </div>
+            <div class="editor-form-row">
+              <label class="editor-label">Ссылка на изображение (URL)</label>
+              <input type="text" id="ref-image-input" class="gov-input" placeholder="https://example.com/image.jpg (необязательно)">
+            </div>
+            <div class="editor-form-row">
+              <label class="editor-label">Описание / Пояснение</label>
+              <textarea id="ref-body-input" class="gov-input gov-textarea" placeholder="Опишите детали вопроса..."></textarea>
+            </div>
+            <button class="btn btn-gold" onclick="publishRef()">Запустить референдум</button>
+          </div>
+        </div>
+        <div class="ref-list" id="ref-feed"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_EMAIL = 'netuimeni045@gmail.com';
+let currentUser = '';
+
+let posts = JSON.parse(localStorage.getItem('ynr_posts_db')) || [];
+let referendums = JSON.parse(localStorage.getItem('ynr_refs_db')) || [];
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedUser = localStorage.getItem('ynr_active_user');
+  if (savedUser) {
+    currentUser = savedUser;
+    initApplication();
+  }
+});
+
+function handleLogin() {
+  const emailInput = document.getElementById('input-email');
+  const email = emailInput.value.trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    alert('Пожалуйста, введите корректный адрес почты.');
+    return;
+  }
+  currentUser = email;
+  localStorage.setItem('ynr_active_user', email);
+  initApplication();
+}
+
+function initApplication() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').classList.add('active');
+  document.getElementById('user-avatar-display').textContent = currentUser.charAt(0).toUpperCase();
+  document.getElementById('user-name-display').textContent = currentUser.split('@')[0];
+
+  const isAdmin = (currentUser === ADMIN_EMAIL);
+  if (isAdmin) {
+    document.getElementById('user-role-display').textContent = 'Президент';
+    document.getElementById('post-editor').style.display = 'block';
+    document.getElementById('ref-editor').style.display = 'block';
+  } else {
+    document.getElementById('user-role-display').textContent = 'Гражданин';
+    document.getElementById('post-editor').style.display = 'none';
+    document.getElementById('ref-editor').style.display = 'none';
+  }
+
+  renderPosts();
+  renderRefs();
+}
+
+function handleLogout() {
+  localStorage.removeItem('ynr_active_user');
+  currentUser = '';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-root').classList.remove('active');
+}
+
+function switchPage(page) {
+  document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-btn-' + page).classList.add('active');
+  const titles = { feed: 'Лента Указов', referendums: 'Референдумы' };
+  document.getElementById('header-title').textContent = titles[page] || page;
+}
+
+function publishDecree() {
+  const title = document.getElementById('decree-title-input').value.trim();
+  const body = document.getElementById('decree-body-input').value.trim();
+  if (!title || !body) { alert('Заполните заголовок и текст.'); return; }
+  const post = { id: Date.now(), title, body, author: currentUser, ts: new Date().toLocaleString('ru') };
+  posts.unshift(post);
+  localStorage.setItem('ynr_posts_db', JSON.stringify(posts));
+  document.getElementById('decree-title-input').value = '';
+  document.getElementById('decree-body-input').value = '';
+  renderPosts();
+}
+
+function renderPosts() {
+  const feed = document.getElementById('decree-feed');
+  if (!posts.length) { feed.innerHTML = '<p style="color:var(--t3);font-size:13px;">Указов пока нет.</p>'; return; }
+  feed.innerHTML = posts.map(p => `
+    <div class="post-card">
+      <div class="post-meta">
+        <span class="post-author"><i class="fa-solid fa-crown" style="margin-right:5px;"></i>${p.author.split('@')[0]}</span>
+        <span class="post-ts">${p.ts}</span>
+      </div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-body">${p.body}</div>
+    </div>`).join('');
+}
+
+function publishRef() {
+  const title = document.getElementById('ref-title-input').value.trim();
+  const body = document.getElementById('ref-body-input').value.trim();
+  const img = document.getElementById('ref-image-input').value.trim();
+  if (!title) { alert('Введите вопрос референдума.'); return; }
+  const ref = { id: Date.now(), title, body, img, yes: 0, no: 0, voted: [] };
+  referendums.unshift(ref);
+  localStorage.setItem('ynr_refs_db', JSON.stringify(referendums));
+  document.getElementById('ref-title-input').value = '';
+  document.getElementById('ref-body-input').value = '';
+  document.getElementById('ref-image-input').value = '';
+  renderRefs();
+}
+
+function vote(id, choice) {
+  const ref = referendums.find(r => r.id === id);
+  if (!ref) return;
+  if (ref.voted.includes(currentUser)) { alert('Вы уже голосовали.'); return; }
+  ref[choice]++;
+  ref.voted.push(currentUser);
+  localStorage.setItem('ynr_refs_db', JSON.stringify(referendums));
+  renderRefs();
+}
+
+function renderRefs() {
+  const feed = document.getElementById('ref-feed');
+  if (!referendums.length) { feed.innerHTML = '<p style="color:var(--t3);font-size:13px;">Референдумов пока нет.</p>'; return; }
+  feed.innerHTML = referendums.map(r => {
+    const hasVoted = r.voted.includes(currentUser);
+    const total = r.yes + r.no;
+    const yesPct = total ? Math.round(r.yes / total * 100) : 0;
+    const noPct = total ? Math.round(r.no / total * 100) : 0;
+    return `
+    <div class="ref-card">
+      <div class="post-title">${r.title}</div>
+      ${r.img ? `<img class="ref-img" src="${r.img}" alt="Изображение референдума" onerror="this.style.display='none'">` : ''}
+      ${r.body ? `<div class="post-body" style="margin-bottom:12px;">${r.body}</div>` : ''}
+      <div style="margin-bottom:10px; font-size:12px; color:var(--t3);">За: <span style="color:var(--ok2);">${r.yes} (${yesPct}%)</span> &nbsp; Против: <span style="color:var(--err2);">${r.no} (${noPct}%)</span></div>
+      ${hasVoted
+        ? `<div style="font-size:12px; color:var(--gold2); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px;">✓ Вы проголосовали</div>`
+        : `<div><button class="btn btn-green" onclick="vote(${r.id},'yes')"><i class="fa-solid fa-check"></i> За</button><button class="btn btn-red" onclick="vote(${r.id},'no')"><i class="fa-solid fa-xmark"></i> Против</button></div>`
+      }
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
